@@ -115,7 +115,7 @@ const SearchSection = () => {
           </p>
         </div>
         <div className="flex justify-center">
-          <div className="flex flex-wrap justify-center shadow-xl rounded-2xl gap-4 p-6  w-[75%]">
+          <div className="flex flex-wrap justify-center shadow-xl border border-hero-col rounded-2xl gap-4 p-12  w-[75%]">
             <div className="p-2 lg:flex-1 ">
               <select
                 id="template"
