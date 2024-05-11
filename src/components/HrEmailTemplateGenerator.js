@@ -50,7 +50,7 @@ const HREmailTemplateGenerator = () => {
           <img
             src={imageUrl}
             alt="Template Generator"
-            className="max-w-full h-auto rounded-lg shadow-md"
+            className="w-[60%] md:max-w-full h-auto rounded-lg shadow-md"
           />
         </div>
       </div>
