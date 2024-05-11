@@ -7,7 +7,6 @@ import step4 from "../images/step4.png";
 import step5 from "../images/step5.png";
 import Cards from "./Cards";
 
-
 const HREmailTemplateGenerator = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 md:px-8 py-12">
@@ -15,7 +14,7 @@ const HREmailTemplateGenerator = () => {
         How to use the HR Email Template Generator
       </h1>
       <div className="flex flex-col md:flex-row items-center justify-center md:space-x-16 mb-16">
-        <div className="md:w-1/2 mb-10 md:mb-0 mx-auto px-4 ml-[10%]">
+        <div className="md:w-1/2 mb-10 md:mb-0 mx-auto px-4 md:ml-[10%] md:mr-0">
           <Step
             steps={step1}
             stepNumber="1"
@@ -47,7 +46,7 @@ const HREmailTemplateGenerator = () => {
             description="Copy the email and send it to the desired recipients. If you want to edit it, simply click on the text and modify it as per your requirements."
           />
         </div>
-        <div className="md:w-1/2 lg:h-[600px] md:h-[600px] h-[400px] w-[200px] flex justify-center">
+        <div className="md:w-1/2 md:h-auto w-full flex justify-center">
           <img
             src={imageUrl}
             alt="Template Generator"
@@ -55,9 +54,8 @@ const HREmailTemplateGenerator = () => {
           />
         </div>
       </div>
-      <Cards/>
+      <Cards />
     </div>
-    
   );
 };
 
@@ -66,14 +64,13 @@ const Step = ({ stepNumber, title, description, steps }) => {
     <div className="flex items-start mb-8">
       <div className="mr-4">
         <span className="text-white rounded-full w-16 h-8 flex items-center justify-center">
-        <img src={steps} alt="" />
+          <img src={steps} alt="" />
         </span>
       </div>
       <div>
         <h2 className="text-lg font-semibold mb-2">{title}</h2>
         <p className="text-gray-700">{description}</p>
       </div>
-      
     </div>
   );
 };

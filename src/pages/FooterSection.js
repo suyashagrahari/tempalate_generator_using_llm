@@ -110,7 +110,7 @@ const FooterSection = () => {
           </div>
           
         </div>
-        <hr />
+        <hr className='mt-5'/>
         <div className='flex flex-row justify-around mt-2'>
             <p className="text-gray-400">All rights reserved © HireQuotient, 2022</p>
             <p className="text-gray-400">Sitemap | Guide: Validity of our assessments</p>
