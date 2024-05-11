@@ -120,7 +120,7 @@ const SearchSection = () => {
               <select
                 id="template"
                 name="template"
-                className="w-full h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out "
+                className="sm:w-full w-[200px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out "
                 value={selectedTemplate}
                 onChange={handleTemplateChange}>
                 <option value="">Select Email Template</option>
@@ -135,7 +135,7 @@ const SearchSection = () => {
               <select
                 id="language"
                 name="language"
-                className="w-full h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                className="sm:w-full w-[200px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
                 value={selectedLanguage}
                 onChange={handleLanguageChange}>
                 <option value="">Select Language (Optional)</option>
