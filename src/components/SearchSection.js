@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ButtonIcon from "../images/buttonicon.png";
 import Tabs from "./Tabs";
+import { useSelector, useDispatch } from 'react-redux';
+import { updateTemplate } from '../redux/templateSlice';
+
 
 const genAI = new GoogleGenerativeAI("AIzaSyB-a_-nkxziWWhCdEkIK_Vfs42LueGOIak");
 
@@ -47,28 +50,56 @@ export async function geminiResponse(message) {
 
 // Helper function to extract required fields from the generated template
 const extractRequiredFields = (template) => {
-  const regex = /\[(.*?)\]/g; // Regular expression to match text within square brackets
-  const matches = template.match(regex);
-  if (matches) {
-    // Extract field names from matches and remove square brackets
-    return matches.map(match => match.replace(/\[|\]/g, ''));
-  } else {
-    return [];
-  }
-};
+    const regex = /\[(.*?)\]/g; // Regular expression to match text within square brackets
+    const matches = template.match(regex);
+    if (matches) {
+      // Extract field names from matches and remove square brackets
+      return matches.map(match => match.replace(/\[|\]/g, '').toLowerCase());
+    } else {
+      return [];
+    }
+  };
 
 const SearchSection = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [generatedTemplate, setGeneratedTemplate] = useState("");
+  const [para, setPara] = useState("");
   const [smartInputs, setSmartInputs] = useState({});
   const [isLoading, setIsLoading] = useState(false); // Track loading state
   const [requiredFields, setRequiredFields] = useState([]); // Track required fields for generated template
+
+  const dispatch = useDispatch();
+  const storedTemplate = useSelector((state) => state.template.template); // Select template from Redux store
+
+  const extractFieldFromTemplate = extractRequiredFields(storedTemplate);
+  console.log("smart input fields", smartInputs);
+  console.log(extractFieldFromTemplate);
+  console.log(storedTemplate)
+
+// 1)-  Define an object with word replacements
+
+
+// Create a regular expression pattern to match all words to be replaced
+const pattern = new RegExp(Object.keys(smartInputs).join("|"), "gi");
+console.log(pattern);
+
+// Replace all matched words with their respective replacements
+
+
+// dispatch(updateTemplate(updatedParagraph));
+// console.log(updatedParagraph);
 
   useEffect(() => {
     setSmartInputs({});
     setGeneratedTemplate("");
   }, [selectedTemplate]);
+  
+
+  useEffect(()=> {
+    const updatedParagraph = storedTemplate.replace(pattern, match => smartInputs[match.toLowerCase()]);
+    setPara(updatedParagraph)
+  },[smartInputs])
 
   const handleTemplateChange = (e) => {
     setSelectedTemplate(e.target.value);
@@ -80,6 +111,7 @@ const SearchSection = () => {
 
   const handleSmartInputChange = (e) => {
     setSmartInputs({ ...smartInputs, [e.target.name]: e.target.value });
+
   };
 
   const handleGenerate = async () => {
@@ -88,13 +120,16 @@ const SearchSection = () => {
       const { text, requiredFields } = await generateTemplate(
         selectedTemplate,
         selectedLanguage,
-        smartInputs
+        smartInputs // Pass the updated smart inputs
       );
       setGeneratedTemplate(text);
+      setPara(text);
       setRequiredFields(requiredFields);
+      setPara(text);
       
       // Console log the input fields
       console.log("Smart Inputs:", smartInputs);
+      dispatch(updateTemplate(text)); // Update the template in Redux store
     } catch (error) {
       console.error("Error generating template:", error);
     } finally {
@@ -148,8 +183,8 @@ const SearchSection = () => {
                 value={selectedTemplate}
                 onChange={handleTemplateChange}>
                 <option value="">Select Email Template</option>
-                {emailTemplates.map((template) => (
-                  <option key={template.name} value={template.name}>
+                {emailTemplates.map((template, index) => (
+                  <option key={index} value={template.name}>
                     {template.name}
                   </option>
                 ))}
@@ -163,8 +198,8 @@ const SearchSection = () => {
                 value={selectedLanguage}
                 onChange={handleLanguageChange}>
                 <option value="">Select Language (Optional)</option>
-                {languages.map((language) => (
-                  <option key={language} value={language}>
+                {languages.map((language, index) => (
+                  <option key={index} value={language}>
                     {language}
                   </option>
                 ))}
@@ -185,7 +220,7 @@ const SearchSection = () => {
             </div>
           </div>
         </div>
-        {generatedTemplate && (
+        {para && (
           <div className="container px-5 py-24 flex justify-center">
             {/* Template Area */}
             <div className="bg-white relative flex flex-wrap py-6 rounded-xl bg-transparent shadow-xl md:w-full max-w-[90%]">
@@ -196,7 +231,7 @@ const SearchSection = () => {
                 <textarea
                   className="w-full mt-2 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
                   rows={15}
-                  value={generatedTemplate}
+                  value={para}
                   readOnly
                 />
               </div>
@@ -205,8 +240,8 @@ const SearchSection = () => {
                   <h2 className="title-font font-semibold text-gray-900  text-xl">
                     Smart Input Fields
                   </h2>
-                  {requiredFields.map((field) => (
-                    <div key={field} className="relative mb-4">
+                  {requiredFields.map((field, index) => (
+                    <div key={`${field}_${index}`} className="relative mb-4">
                       <label
                         htmlFor={field.toLowerCase()}
                         className="leading-7 text-sm text-gray-600">
