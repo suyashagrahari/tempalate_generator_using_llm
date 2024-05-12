@@ -224,7 +224,7 @@ const SearchSection = () => {
             </div>
           </div>
         </div>
-        {para && (
+        {requiredFields.length > 0 && (
           <div className="container px-5 py-24 flex justify-center">
             {/* Template Area */}
             {para !== undefined ? (

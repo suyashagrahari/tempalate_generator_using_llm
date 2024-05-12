@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import logo from "../images/logo.png";
 
 const Navbar = () => {
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
+    const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [showResourcesMenu, setShowResourcesMenu] = useState(false);
   const [showCompanyMenu, setShowCompanyMenu] = useState(false);
   const [showProductMenu, setShowProductMenu] = useState(false);
 
+  const [showDrawer, setShowDrawer] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
- 
+
+  // Create a ref to the sidebar element
+  const sidebarRef = useRef(null);
+
+  // Close the sidebar when clicking outside of it
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setShowDrawer(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   const toggleDrawer = () => {
     setShowDrawer(!showDrawer);
@@ -19,8 +35,6 @@ const Navbar = () => {
   const handleMenuClick = (menu) => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
-
-
 
   return (
     <>
@@ -37,8 +51,9 @@ const Navbar = () => {
             </button>
           </div>
           <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center gap-5 hidden md:flex">
-            {/* Products */}
-            <div className="relative">
+            {/* Menu items */}
+                        {/* Products */}
+                        <div className="relative">
               <a className={`mr-5 hover:text-gray-900 font-semibold cursor-pointer relative ${activeMenu === 'Products' ? "text-blue-500" : ""}`} onClick={() => handleMenuClick('Products')}>
                 Products
                 <svg className={`w-4 h-4 inline-block ml-1 transition-transform transform ${activeMenu === 'Products' ? "rotate-90" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -133,16 +148,16 @@ const Navbar = () => {
             </div>
             {/* Request Demo Button */}
             <button className="inline-flex items-center border-0 py-1 px-3 focus:outline-none rounded text-base bg-button-col text-white hover:bg-indigo-700" onClick={() => console.log("Request Demo clicked")}>Request demo</button>
+
           </nav>
         </div>
       </header>
       {/* Mobile Menu Drawer */}
-      <div className={`md:hidden fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity ${showDrawer ? 'z-50' : 'z-0'} ${showDrawer ? 'opacity-100' : 'opacity-0'}`} onClick={toggleDrawer}></div>
-      <div className={`md:hidden fixed inset-y-0 left-0 flex flex-col w-64 bg-white shadow-xl ${showDrawer ? 'z-50' : 'z-0'} ${showDrawer ? 'translate-x-0' : '-translate-x-full'} transition-all duration-300`}>
+      <div ref={sidebarRef} className={`md:hidden fixed inset-y-0 left-0 flex flex-col w-64 bg-white shadow-xl ${showDrawer ? 'z-50' : 'z-0'} ${showDrawer ? 'translate-x-0' : '-translate-x-full'} transition-all duration-300`}>
         <div className="p-5">
-
-             {/* Products */}
-          <a 
+          {/* Sidebar content */}
+                       {/* Products */}
+                       <a 
             onMouseEnter={() => setShowProductMenu(true)} 
             onMouseLeave={() => setShowProductMenu(false)} 
             className={`block px-4 py-2 font-semibold hover:text-gray-900 cursor-pointer ${showProductMenu ? "text-blue-500" : ""}`}
@@ -265,9 +280,9 @@ const Navbar = () => {
               </div>
             )}
           </a>
-         
-          {/* Add other menu items similarly */}
+            {/* Add other menu items similarly */}
           <button className="w-[150px] mt-4 border border-transparent rounded-md shadow-sm py-2  inline-flex justify-center items-center text-sm font-medium text-white bg-button-col hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ">Request demo</button>
+
         </div>
       </div>
     </>
