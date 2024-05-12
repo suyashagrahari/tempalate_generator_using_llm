@@ -3,7 +3,7 @@ import React from 'react';
 const Cards = () => {
   return (
     <section className="text-gray-600 body-font">
-      <div className="container px-5 py-24 mx-auto">
+      <div className="container px-5 sm:py-24  mx-auto">
         <h1 className="text-4xl sm:font-bold font-semibold title-font text-gray-900 mb-12 text-center">Explore other free tools</h1>
 
         <div className="flex flex-wrap justify-center">

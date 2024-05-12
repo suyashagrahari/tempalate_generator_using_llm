@@ -9,11 +9,11 @@ import Cards from "./Cards";
 
 const HREmailTemplateGenerator = () => {
   return (
-    <div className="container mx-auto px-4 sm:px-6 md:px-8 py-12">
-      <h1 className="text-3xl font-bold text-center mb-10">
+    <div className="container mx-auto px-4 sm:px-6 md:px-8 py-12 ">
+      <h1 className="text-3xl font-bold text-center mb-10 ">
         How to use the HR Email Template Generator
       </h1>
-      <div className="flex flex-col md:flex-row items-center justify-center md:space-x-16 mb-16">
+      <div className="flex flex-col md:flex-row items-center justify-center md:space-x-16 ">
         <div className="md:w-1/2 mb-10 md:mb-0 mx-auto px-4 md:ml-[10%] md:mr-0">
           <Step
             steps={step1}
