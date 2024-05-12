@@ -2,21 +2,20 @@ import React, { useState, useEffect } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ButtonIcon from "../images/buttonicon.png";
 import Tabs from "./Tabs";
-import { useSelector, useDispatch } from 'react-redux';
-import { updateTemplate } from '../redux/templateSlice';
-
+import { useSelector, useDispatch } from "react-redux";
+import { updateTemplate } from "../redux/templateSlice";
 
 const genAI = new GoogleGenerativeAI("AIzaSyB-a_-nkxziWWhCdEkIK_Vfs42LueGOIak");
 
 const emailTemplates = [
   { name: "Interview Invitation Email" },
   { name: "Rejection Email" },
-  { name: "Interview Confirmation Email"},
-  { name: "Offer Letter Email"},
+  { name: "Interview Confirmation Email" },
+  { name: "Offer Letter Email" },
   { name: "Referral Email" },
 ];
 
-const languages = ["English", "Spanish", "French", "German"];
+const languages = [ "English(UK)","Spanish"];
 
 export async function geminiResponse(message) {
   const timeout = new Promise((_, reject) => {
@@ -31,7 +30,7 @@ export async function geminiResponse(message) {
     const result = await Promise.race([model.generateContent(prompt), timeout]);
     const response = await result.response;
     const text = response.text();
-    
+
     // Extract required fields from the generated template
     const requiredFields = extractRequiredFields(text);
 
@@ -40,7 +39,7 @@ export async function geminiResponse(message) {
     if (error.message === "LLM API timeout") {
       return {
         text: "Sorry, I'm unable to respond at the moment. Please try again later.",
-        requiredFields: []
+        requiredFields: [],
       };
     } else {
       throw error;
@@ -50,15 +49,15 @@ export async function geminiResponse(message) {
 
 // Helper function to extract required fields from the generated template
 const extractRequiredFields = (template) => {
-    const regex = /\[(.*?)\]/g; // Regular expression to match text within square brackets
-    const matches = template.match(regex);
-    if (matches) {
-      // Extract field names from matches and remove square brackets
-      return matches.map(match => match.replace(/\[|\]/g, '').toLowerCase());
-    } else {
-      return [];
-    }
-  };
+  const regex = /\[(.*?)\]/g; // Regular expression to match text within square brackets
+  const matches = template.match(regex);
+  if (matches) {
+    // Extract field names from matches and remove square brackets
+    return matches.map((match) => match.replace(/\[|\]/g, "").toLowerCase());
+  } else {
+    return [];
+  }
+};
 
 const SearchSection = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -75,31 +74,31 @@ const SearchSection = () => {
   const extractFieldFromTemplate = extractRequiredFields(storedTemplate);
   console.log("smart input fields", smartInputs);
   console.log(extractFieldFromTemplate);
-  console.log(storedTemplate)
+  console.log(storedTemplate);
 
-// 1)-  Define an object with word replacements
+  // 1)-  Define an object with word replacements
 
+  // Create a regular expression pattern to match all words to be replaced
+  const pattern = new RegExp(Object.keys(smartInputs).join("|"), "gi");
+  console.log(pattern);
 
-// Create a regular expression pattern to match all words to be replaced
-const pattern = new RegExp(Object.keys(smartInputs).join("|"), "gi");
-console.log(pattern);
+  // Replace all matched words with their respective replacements
 
-// Replace all matched words with their respective replacements
-
-
-// dispatch(updateTemplate(updatedParagraph));
-// console.log(updatedParagraph);
+  // dispatch(updateTemplate(updatedParagraph));
+  // console.log(updatedParagraph);
 
   useEffect(() => {
     setSmartInputs({});
     setGeneratedTemplate("");
   }, [selectedTemplate]);
-  
 
-  useEffect(()=> {
-    const updatedParagraph = storedTemplate.replace(pattern, match => smartInputs[match.toLowerCase()]);
-    setPara(updatedParagraph)
-  },[smartInputs])
+  useEffect(() => {
+    const updatedParagraph = storedTemplate.replace(
+      pattern,
+      (match) => smartInputs[match.toLowerCase()]
+    );
+    setPara(updatedParagraph);
+  }, [smartInputs]);
 
   const handleTemplateChange = (e) => {
     setSelectedTemplate(e.target.value);
@@ -111,7 +110,6 @@ console.log(pattern);
 
   const handleSmartInputChange = (e) => {
     setSmartInputs({ ...smartInputs, [e.target.name]: e.target.value });
-
   };
 
   const handleGenerate = async () => {
@@ -126,7 +124,7 @@ console.log(pattern);
       setPara(text);
       setRequiredFields(requiredFields);
       setPara(text);
-      
+
       // Console log the input fields
       console.log("Smart Inputs:", smartInputs);
       dispatch(updateTemplate(text)); // Update the template in Redux store
@@ -148,7 +146,7 @@ console.log(pattern);
 
   const replaceSmartFields = (template, smartInputs) => {
     Object.entries(smartInputs).forEach(([key, value]) => {
-      const regex = new RegExp(`{{${key}}}`, "g");
+      const regex = new RegExp(`\\[${key}\\]`, "g"); // Modify the regex pattern
       template = template.replace(regex, value);
     });
     return template;
@@ -179,7 +177,7 @@ console.log(pattern);
               <select
                 id="template"
                 name="template"
-                className="sm:w-full w-[200px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out "
+                className="sm:w-full w-[220px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 sm:text-base text-sm outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out "
                 value={selectedTemplate}
                 onChange={handleTemplateChange}>
                 <option value="">Select Email Template</option>
@@ -190,14 +188,15 @@ console.log(pattern);
                 ))}
               </select>
             </div>
-            <div className="p-2  lg:flex-3">
+            <div className="p-2 lg:flex-3">
               <select
                 id="language"
                 name="language"
-                className="w-full h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                className="sm:w-full w-[220px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 sm:text-base text-sm outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
                 value={selectedLanguage}
-                onChange={handleLanguageChange}>
-                <option value="">Select Language (Optional)</option>
+                onChange={handleLanguageChange}
+                defaultValue="English(US)">
+                <option value="">English(US)</option>
                 {languages.map((language, index) => (
                   <option key={index} value={language}>
                     {language}
@@ -205,15 +204,20 @@ console.log(pattern);
                 ))}
               </select>
             </div>
-            <div className="p-2 lg:flex-3">
+            <div className="p-2 lg:flex-3 items-center">
               <button
-                className="text-white bg-gradient-to-r  from-gradient-start font-bold to-gradient-end border-0 pt-3 px-8 w-[165px] h-[52px] focus:outline-none hover:bg-indigo-600 rounded text-lg flex justify-center"
+                className="text-white bg-gradient-to-r from-gradient-start to-gradient-end border-0 sm:pt-3 py-2 pr-2 sm:px-8 sm:w-[165px] sm:h-[52px] w-[120px] sm:text-base sm:font-semibold font-medium focus:outline-none hover:bg-indigo-600 rounded sm:text-lg flex justify-center items-center"
                 onClick={handleGenerate}>
                 {isLoading ? (
                   "Generating..."
                 ) : (
                   <>
-                    <img src={ButtonIcon} alt="buttonicon" /> Generate
+                    <img
+                      src={ButtonIcon}
+                      alt="buttonicon"
+                      className="sm:w-full w-5 mr-2"
+                    />{" "}
+                    Generate
                   </>
                 )}
               </button>
@@ -223,48 +227,54 @@ console.log(pattern);
         {para && (
           <div className="container px-5 py-24 flex justify-center">
             {/* Template Area */}
-            <div className="bg-white relative flex flex-wrap py-6 rounded-xl bg-transparent shadow-xl md:w-full max-w-[90%]">
-              <div className="lg:w-1/2 w-full px-6 mb-4 lg:mb-0">
-                <h2 className="title-font font-semibold text-gray-900 mt-4 text-xl">
-                  Generated Template
-                </h2>
-                <textarea
-                  className="w-full mt-2 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
-                  rows={15}
-                  value={para}
-                  readOnly
-                />
-              </div>
-              <div className="lg:w-1/2 w-full px-6 flex justify-center items-center">
-                <div className="md:w-8/12 w-11/12"> {/* Adjust width as needed */}
-                  <h2 className="title-font font-semibold text-gray-900  text-xl">
-                    Smart Input Fields
+            {para !== undefined ? (
+              <div className="bg-white relative flex flex-wrap py-6 rounded-xl bg-transparent shadow-xl md:w-full max-w-[90%]">
+                <div className="lg:w-1/2 w-full px-6 mb-4 lg:mb-0">
+                  <h2 className="title-font font-semibold text-gray-900 mt-4 text-xl">
+                    Generated Template
                   </h2>
-                  {requiredFields.map((field, index) => (
-                    <div key={`${field}_${index}`} className="relative mb-4">
-                      <label
-                        htmlFor={field.toLowerCase()}
-                        className="leading-7 text-sm text-gray-600">
-                        {field}:
-                      </label>
-                      <input
-                        type="text"
-                        id={field.toLowerCase()}
-                        name={field.toLowerCase()}
-                        className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                        value={smartInputs[field.toLowerCase()] || ""}
-                        onChange={handleSmartInputChange}
-                      />
-                    </div>
-                  ))}
-                  <button
-                    className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
-                    onClick={handleGenerate}>
-                    Apply Changes
-                  </button>
+                  <textarea
+                    className="w-full mt-2 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                    rows={15}
+                    value={para}
+                    readOnly
+                  />
+                </div>
+                <div className="lg:w-1/2 w-full px-6 flex justify-center items-center">
+                  <div className="md:w-8/12 w-11/12">
+                    {" "}
+                    {/* Adjust width as needed */}
+                    <h2 className="title-font font-semibold text-gray-900  text-xl">
+                      Smart Input Fields
+                    </h2>
+                    {requiredFields.map((field, index) => (
+                      <div key={`${field}_${index}`} className="relative mb-4">
+                        <label
+                          htmlFor={field.toLowerCase()}
+                          className="leading-7 text-sm text-gray-600">
+                          {field}:
+                        </label>
+                        <input
+                          type="text"
+                          id={field.toLowerCase()}
+                          name={field.toLowerCase()}
+                          className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                          value={smartInputs[field.toLowerCase()] || ""}
+                          onChange={handleSmartInputChange}
+                        />
+                      </div>
+                    ))}
+                    <button
+                      className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
+                      onClick={handleGenerate}>
+                      Apply Changes
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              {}
+            )}
           </div>
         )}
         <Tabs />

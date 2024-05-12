@@ -46,7 +46,7 @@ const HREmailTemplateGenerator = () => {
             description="Copy the email and send it to the desired recipients. If you want to edit it, simply click on the text and modify it as per your requirements."
           />
         </div>
-        <div className="md:w-1/2 md:h-auto w-full flex justify-center">
+        <div className="md:w-1/2 md:h-auto w-full hidden sm:inline  flex justify-center">
           <img
             src={imageUrl}
             alt="Template Generator"
