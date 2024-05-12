@@ -96,7 +96,7 @@ const SearchSection = () => {
       pattern,
       (match) => smartInputs[match.toLowerCase()]
     );
-    setPara(updatedParagraph);
+    setPara(updatedParagraph.replace(/\[|\]/g, "")); // Remove square brackets
   }, [smartInputs]);
 
   // Handle template change
@@ -124,7 +124,7 @@ const SearchSection = () => {
         smartInputs // Pass the updated smart inputs
       );
       setGeneratedTemplate(text);
-      setPara(text);
+      setPara(text.replace(/\[|\]/g, "")); // Remove square brackets
       setRequiredFields(requiredFields);
 
       // Console log the input fields
@@ -292,12 +292,7 @@ const SearchSection = () => {
                         />
                       </div>
                     ))}
-                    <button
-                      className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
-                      onClick={handleGenerate}
-                    >
-                      Apply Changes
-                    </button>
+                    
                   </div>
                 </div>
               </div>
