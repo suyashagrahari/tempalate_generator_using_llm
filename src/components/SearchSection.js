@@ -151,6 +151,7 @@ const SearchSection = () => {
   const replaceSmartFields = (template, smartInputs) => {
     Object.entries(smartInputs).forEach(([key, value]) => {
       const regex = new RegExp(`\\[${key}\\]`, "g");
+      const fieldName = key.replace(/\[|\]/g, ""); // Remove brackets from field name
       template = template.replace(regex, value);
     });
     return template;
@@ -173,8 +174,11 @@ const SearchSection = () => {
     }, 2000);
   };
 
+  // Get unique smart input fields
+  const uniqueSmartInputFields = Array.from(new Set(requiredFields));
+
   return (
-    <section className="text-gray-600 body-font ">
+    <section className="text-gray-600 body-font">
       <div className="container px-5 sm:py-24 py-10 mx-auto">
         <div className="flex flex-col text-center w-full mb-12 gap-7">
           <h1 className="sm:text-3xl text-2xl font-poppins font-semibold title-font  text-gray-900">
@@ -193,7 +197,8 @@ const SearchSection = () => {
                 name="template"
                 className="sm:w-full w-[300px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 sm:text-base text-sm outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out "
                 value={selectedTemplate}
-                onChange={handleTemplateChange}>
+                onChange={handleTemplateChange}
+              >
                 <option value="">Select Email Template</option>
                 {emailTemplates.map((template, index) => (
                   <option key={index} value={template.name}>
@@ -209,7 +214,7 @@ const SearchSection = () => {
                 className="sm:w-full w-[300px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 sm:text-base text-sm outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
                 value={selectedLanguage}
                 onChange={handleLanguageChange}
-                defaultValue="English(US)">
+              >
                 <option value="">English(US)</option>
                 {languages.map((language, index) => (
                   <option key={index} value={language}>
@@ -221,7 +226,8 @@ const SearchSection = () => {
             <div className="p-2 lg:flex-3 items-center">
               <button
                 className="text-white bg-gradient-to-r from-gradient-start to-gradient-end border-0 sm:pt-3 py-2 pr-2 sm:px-8 sm:w-[165px] sm:h-[52px] w-[170px] sm:text-base sm:font-semibold font-medium focus:outline-none hover:bg-indigo-600 rounded sm:text-lg flex justify-center items-center"
-                onClick={handleGenerate}>
+                onClick={handleGenerate}
+              >
                 {isLoading ? (
                   "Generating..."
                 ) : (
@@ -248,17 +254,13 @@ const SearchSection = () => {
                     <h2 className="title-font font-semibold text-gray-900  text-xl">
                       Generated Template
                     </h2>
-                    {/* Copy icon positioned at the top of the template field */}
                     {
                         isCopied ? <span className="text-sm text-gray-500 ml-2">Copied!</span> : <FontAwesomeIcon
                         icon={faCopy}
                         className="text-gray-500 cursor-pointer"
                         onClick={handleCopyTemplate}
                       />
-                     
                     }
-                    
-                   
                   </div>
                   <textarea
                     className="w-full mt-8 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
@@ -269,16 +271,15 @@ const SearchSection = () => {
                 </div>
                 <div className="lg:w-1/2 w-full px-6 flex justify-center items-center">
                   <div className="md:w-8/12 w-11/12">
-                    {" "}
-                    {/* Adjust width as needed */}
                     <h2 className="title-font font-semibold text-gray-900  text-xl">
                       Smart Input Fields
                     </h2>
-                    {requiredFields.map((field, index) => (
+                    {uniqueSmartInputFields.map((field, index) => (
                       <div key={`${field}_${index}`} className="relative mb-4">
                         <label
                           htmlFor={field.toLowerCase()}
-                          className="leading-7 text-sm text-gray-600">
+                          className="leading-7 text-sm text-gray-600"
+                        >
                           {field}:
                         </label>
                         <input
@@ -293,7 +294,8 @@ const SearchSection = () => {
                     ))}
                     <button
                       className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
-                      onClick={handleGenerate}>
+                      onClick={handleGenerate}
+                    >
                       Apply Changes
                     </button>
                   </div>
