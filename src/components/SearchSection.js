@@ -6,11 +6,11 @@ import Tabs from "./Tabs";
 const genAI = new GoogleGenerativeAI("AIzaSyB-a_-nkxziWWhCdEkIK_Vfs42LueGOIak");
 
 const emailTemplates = [
-  { name: "Interview Invitation Email", fields: ["Name", "Email", "Date"] },
-  { name: "Rejection Email", fields: ["Name", "Reason"] },
-  { name: "Interview Confirmation Email", fields: ["Name", "Date", "Time"] },
-  { name: "Offer Letter Email", fields: ["Name", "Position", "Salary"] },
-  { name: "Referral Email", fields: ["Name", "Referral Code"] },
+  { name: "Interview Invitation Email" },
+  { name: "Rejection Email" },
+  { name: "Interview Confirmation Email"},
+  { name: "Offer Letter Email"},
+  { name: "Referral Email" },
 ];
 
 const languages = ["English", "Spanish", "French", "German"];
@@ -28,15 +28,34 @@ export async function geminiResponse(message) {
     const result = await Promise.race([model.generateContent(prompt), timeout]);
     const response = await result.response;
     const text = response.text();
-    return text;
+    
+    // Extract required fields from the generated template
+    const requiredFields = extractRequiredFields(text);
+
+    return { text, requiredFields };
   } catch (error) {
     if (error.message === "LLM API timeout") {
-      return "Sorry, I'm unable to respond at the moment. Please try again later.";
+      return {
+        text: "Sorry, I'm unable to respond at the moment. Please try again later.",
+        requiredFields: []
+      };
     } else {
       throw error;
     }
   }
 }
+
+// Helper function to extract required fields from the generated template
+const extractRequiredFields = (template) => {
+  const regex = /\[(.*?)\]/g; // Regular expression to match text within square brackets
+  const matches = template.match(regex);
+  if (matches) {
+    // Extract field names from matches and remove square brackets
+    return matches.map(match => match.replace(/\[|\]/g, ''));
+  } else {
+    return [];
+  }
+};
 
 const SearchSection = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -44,6 +63,7 @@ const SearchSection = () => {
   const [generatedTemplate, setGeneratedTemplate] = useState("");
   const [smartInputs, setSmartInputs] = useState({});
   const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const [requiredFields, setRequiredFields] = useState([]); // Track required fields for generated template
 
   useEffect(() => {
     setSmartInputs({});
@@ -65,12 +85,16 @@ const SearchSection = () => {
   const handleGenerate = async () => {
     setIsLoading(true); // Set loading to true when generating
     try {
-      const template = await generateTemplate(
+      const { text, requiredFields } = await generateTemplate(
         selectedTemplate,
         selectedLanguage,
         smartInputs
       );
-      setGeneratedTemplate(template);
+      setGeneratedTemplate(text);
+      setRequiredFields(requiredFields);
+      
+      // Console log the input fields
+      console.log("Smart Inputs:", smartInputs);
     } catch (error) {
       console.error("Error generating template:", error);
     } finally {
@@ -81,10 +105,10 @@ const SearchSection = () => {
   const generateTemplate = async (templateName, language, smartInputs) => {
     let prompt = `Generate a ${templateName} in ${language}.`;
     for (const [key, value] of Object.entries(smartInputs)) {
-      prompt += ` ${key}: ${value}`;
+      prompt += ` {{${key}}}`;
     }
-    const template = await geminiResponse(prompt);
-    return replaceSmartFields(template, smartInputs);
+    const { text, requiredFields } = await geminiResponse(prompt);
+    return { text: replaceSmartFields(text, smartInputs), requiredFields };
   };
 
   const replaceSmartFields = (template, smartInputs) => {
@@ -135,7 +159,7 @@ const SearchSection = () => {
               <select
                 id="language"
                 name="language"
-                className="sm:w-full w-[200px] h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                className="w-full h-[52px] bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out"
                 value={selectedLanguage}
                 onChange={handleLanguageChange}>
                 <option value="">Select Language (Optional)</option>
@@ -162,56 +186,52 @@ const SearchSection = () => {
           </div>
         </div>
         {generatedTemplate && (
-  <div className="container px-5 py-24 flex justify-center">
-    {/* Template Area */}
-    <div className="bg-white relative flex flex-wrap py-6 rounded-xl bg-transparent shadow-xl md:w-full max-w-[90%]">
-      <div className="lg:w-1/2 w-full px-6 mb-4 lg:mb-0">
-        <h2 className="title-font font-semibold text-gray-900 mt-4 text-xl">
-          Generated Template
-        </h2>
-        <textarea
-          className="w-full mt-2 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
-          rows={15}
-          value={generatedTemplate}
-          readOnly
-        />
-      </div>
-      <div className="lg:w-1/2 w-full px-6 flex justify-center items-center">
-        <div className="md:w-8/12 w-11/12"> {/* Adjust width as needed */}
-          <h2 className="title-font font-semibold text-gray-900  text-xl">
-            Smart Input Fields
-          </h2>
-          {getSmartInputFields().map((field) => (
-            <div key={field} className="relative mb-4">
-              <label
-                htmlFor={field.toLowerCase()}
-                className="leading-7 text-sm text-gray-600">
-                {field}:
-              </label>
-              <input
-                type="text"
-                id={field.toLowerCase()}
-                name={field.toLowerCase()}
-                className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                value={smartInputs[field.toLowerCase()] || ""}
-                onChange={handleSmartInputChange}
-              />
+          <div className="container px-5 py-24 flex justify-center">
+            {/* Template Area */}
+            <div className="bg-white relative flex flex-wrap py-6 rounded-xl bg-transparent shadow-xl md:w-full max-w-[90%]">
+              <div className="lg:w-1/2 w-full px-6 mb-4 lg:mb-0">
+                <h2 className="title-font font-semibold text-gray-900 mt-4 text-xl">
+                  Generated Template
+                </h2>
+                <textarea
+                  className="w-full mt-2 bg-gray-100 bg-opacity-70 rounded-xl border shadow-xl focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                  rows={15}
+                  value={generatedTemplate}
+                  readOnly
+                />
+              </div>
+              <div className="lg:w-1/2 w-full px-6 flex justify-center items-center">
+                <div className="md:w-8/12 w-11/12"> {/* Adjust width as needed */}
+                  <h2 className="title-font font-semibold text-gray-900  text-xl">
+                    Smart Input Fields
+                  </h2>
+                  {requiredFields.map((field) => (
+                    <div key={field} className="relative mb-4">
+                      <label
+                        htmlFor={field.toLowerCase()}
+                        className="leading-7 text-sm text-gray-600">
+                        {field}:
+                      </label>
+                      <input
+                        type="text"
+                        id={field.toLowerCase()}
+                        name={field.toLowerCase()}
+                        className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        value={smartInputs[field.toLowerCase()] || ""}
+                        onChange={handleSmartInputChange}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
+                    onClick={handleGenerate}>
+                    Apply Changes
+                  </button>
+                </div>
+              </div>
             </div>
-          ))}
-          <button
-            className="text-white bg-button-col border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg w-full mt-4"
-            onClick={handleGenerate}>
-            Apply Changes
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
+          </div>
+        )}
         <Tabs />
       </div>
     </section>
